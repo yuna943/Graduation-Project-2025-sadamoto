@@ -1,0 +1,67 @@
+\documentclass[a4paper,pdflatex,ja=standard,fleqn]{bxjsarticle}
+\usepackage{amssymb} % 様々な数学記号などを出力可能にする
+\usepackage{amsmath} % 数式を記述するための様々なコマンドを提供する
+\usepackage{graphicx} % 画像を入力可能にする
+\usepackage{listings,xcolor}
+%\usepackage{jlisting}
+\usepackage{url} % 長い英文字列(URL等)を自動改行可能にする。URLはリンクも張る
+\usepackage{tikz} % 図形描画を可能にする
+\usepackage{here}
+\usepackage{comment}
+\usepackage{bussproofs}
+\usepackage{extpfeil}
+\usepackage{centernot} 
+\title{timed extention of the Causal-consistent reversible Debugger for Erlang : CauDEr}
+\author{貞本優菜}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{追加したセマンティクス}
+$\delta(<\theta,e,\mathcal{S}>)$ iff $(\theta,e,\mathcal{S}\overset{\tau}{\not\rightarrow},$
+
+$\hspace{24mm}\wedge\hspace{1mm}\theta,e,\mathcal{S}\overset{send}{\not\rightarrow},$
+
+$\hspace{24mm}\wedge\hspace{1mm}\theta,e,\mathcal{S}\overset{rec}{\not\rightarrow},$
+
+$\hspace{24mm}\wedge\hspace{1mm}\theta,e,\mathcal{S}\overset{spawn}{\not\rightarrow},$
+
+$\hspace{24mm}\wedge\hspace{1mm}\theta,e,\mathcal{S}\overset{self}{\not\rightarrow})$
+と定義する.
+\subsection{Semantics of sequential expressions}
+\begin{prooftree}
+	\LeftLabel{(Sleep1)}
+	\AxiomC{$n \geq 0$}
+	\UnaryInfC{$\theta, timer:sleep(n+1),\mathcal{S}  \xrightarrow{\delta } \theta, timer:sleep(n),\mathcal{S} $}
+  \end{prooftree}
+
+\begin{prooftree}
+	\LeftLabel{(Sleep2)}
+	\AxiomC{}
+	\UnaryInfC{$\theta, timer:sleep(0),\mathcal{S}  \xrightarrow{\tau } \theta,0,\mathcal{S} $}
+  \end{prooftree}
+
+\begin{prooftree}
+	\LeftLabel{(SleepSeq)}
+	\AxiomC{$\delta(<\theta,\mathcal{C}[e],\mathcal{S}>) $}
+	\AxiomC{$\theta,e,\mathcal{S}\xrightarrow{\delta }\theta,e',\mathcal{S}$}
+	\BinaryInfC{$\theta,\mathcal{C}[e],\mathcal{S}\xrightarrow{\delta }\theta,\mathcal{C}[e'],\mathcal{S}$}
+  \end{prooftree}
+
+\subsection{Forward reversible semantics}
+\begin{prooftree}
+	\LeftLabel{(Sleep)}
+	\AxiomC{
+		$\begin{aligned}
+		& \forall i(\theta_i,e_i,\mathcal{S}_i\overset{\tau}{\not\rightarrow}\hspace{1mm}\wedge\hspace{2mm}\theta_i,e_i,\mathcal{S}_i\overset{send}{\not\rightarrow}\hspace{1mm}\wedge\hspace{2mm}\theta_i,e_i,\mathcal{S}_i\overset{spawn}{\not\rightarrow}\hspace{1mm}\wedge\hspace{2mm}\theta_i,e_i,\mathcal{S}_i\overset{self}{\not\rightarrow}) \hspace{2mm}\wedge  \\
+		& \{ (\theta_i,e_i,\mathcal{S}_i\overset{rec}{\not\rightarrow}\hspace{2mm}\wedge\hspace{2mm}\theta_i,e_i,\mathcal{S}_i\xrightarrow{\delta }\theta_i,e'_i,\mathcal{S}_i)\hspace{2mm}\lor\hspace{2mm}(\theta_i,e_i,\mathcal{S}_i\xrightarrow{rec(\kappa,\overline{cl_n})}\hspace{2mm}\wedge\hspace{2mm}\Gamma\not\ni\{\_,p_i,\_\})\} 
+		\end{aligned}$
+		}
+\UnaryInfC{$\Gamma;\underset{i}{|}<p_i,h_i,\theta_i,e_i,\mathcal{S} _i>\hspace{1mm}\xrightarrow{\delta }\hspace{1mm}\Gamma;\underset{i}{|}<p_i,\delta(e_i):h_i,\theta_i,e'_i,\mathcal{S} _i>$}
+\end{prooftree}
+\subsection{Backward reversible semantics}
+$(\overline{\text{Sleep}})\hspace{1mm}\Gamma;\underset{i}{|}<p_i,\delta(e_i):h_i,\theta_i,e'_i,\mathcal{S} _i>\hspace{1mm}\xleftarrow{\delta }\hspace{1mm}\Gamma;\underset{i}{|}<p_i,h_i,\theta_i,e_i,\mathcal{S} _i>$
+
+\end{document}
