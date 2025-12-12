@@ -24,44 +24,46 @@ $\delta(<\theta,e,\mathcal{S}>)$ iff $(\theta,e,\mathcal{S}\overset{\tau}{\not\r
 
 $\hspace{24mm}\wedge\hspace{1mm}\theta,e,\mathcal{S}\overset{send}{\not\rightarrow},$
 
-$\hspace{24mm}\wedge\hspace{1mm}\theta,e,\mathcal{S}\overset{rec}{\not\rightarrow},$
-
 $\hspace{24mm}\wedge\hspace{1mm}\theta,e,\mathcal{S}\overset{spawn}{\not\rightarrow},$
 
 $\hspace{24mm}\wedge\hspace{1mm}\theta,e,\mathcal{S}\overset{self}{\not\rightarrow})$
 
+$cl^{To} = T \to e_1^{To},\dots,e_n^{To}$ ($e_1^{To},\dots,e_n^{To}$をまとめて$e^{To}$とする)
+
+$\delta(\Pi) :=  \forall p_i\in \Pi\hspace{1mm}\delta(\theta_i,e_i,s_i)$
+
+と定義する.
+
 \subsection{Semantics of sequential expressions}
 \begin{prooftree}
-	\LeftLabel{(Sleep1)}
-	\AxiomC{$n \geq 0$}
-	\UnaryInfC{$\theta, timer:sleep(n+1),\mathcal{S}  \xrightarrow{\delta } \theta, timer:sleep(n),\mathcal{S} $}
-  \end{prooftree}
-
-\begin{prooftree}
-	\LeftLabel{(Sleep2)}
+	\LeftLabel{(receive+)}
 	\AxiomC{}
-	\UnaryInfC{$\theta, timer:sleep(0),\mathcal{S}  \xrightarrow{\tau } \theta,0,\mathcal{S} $}
-  \end{prooftree}
-
-\begin{prooftree}
-	\LeftLabel{(SleepSeq)}
-	\AxiomC{$\delta(<\theta,\mathcal{C}[e],\mathcal{S}>) $}
-	\AxiomC{$\theta,e,\mathcal{S}\xrightarrow{\delta }\theta,e',\mathcal{S}$}
-	\BinaryInfC{$\theta,\mathcal{C}[e],\mathcal{S}\xrightarrow{\delta }\theta,\mathcal{C}[e'],\mathcal{S}$}
+	\UnaryInfC{$\theta, \mathcal{C}[receive\hspace{1mm}cl_1,\dots,cl_n\hspace{1mm}after\hspace{1mm}cl^{To}\hspace{1mm}end] ,\mathcal{S}  \xrightarrow{rec(\kappa,\overline{cl},cl^{To})} \theta, \kappa,seq(\mathcal{C}[\_]):\mathcal{S} $}
   \end{prooftree}
 
 \subsection{Forward reversible semantics}
 \begin{prooftree}
-	\LeftLabel{(Sleep)}
+	\LeftLabel{(receive1)}
 	\AxiomC{
 		$\begin{aligned}
-		& \forall i\Bigg[(\theta_i,e_i,\mathcal{S}_i\overset{\tau}{\not\rightarrow}\hspace{1mm}\wedge\hspace{2mm}\theta_i,e_i,\mathcal{S}_i\overset{send}{\not\rightarrow}\hspace{1mm}\wedge\hspace{2mm}\theta_i,e_i,\mathcal{S}_i\overset{spawn}{\not\rightarrow}\hspace{1mm}\wedge\hspace{2mm}\theta_i,e_i,\mathcal{S}_i\overset{self}{\not\rightarrow}) \hspace{2mm}\wedge  \\
-		& \{ (\theta_i,e_i,\mathcal{S}_i\overset{rec}{\not\rightarrow}\hspace{2mm}\wedge\hspace{2mm}\theta_i,e_i,\mathcal{S}_i\xrightarrow{\delta }\theta_i,e'_i,\mathcal{S}_i)\hspace{2mm}\lor\hspace{2mm}(\theta_i,e_i,\mathcal{S}_i\xrightarrow{rec(\kappa,\overline{cl_n})}\hspace{2mm}\wedge\hspace{2mm}\Gamma\not\ni\{\_,p_i,\_\})\}\Bigg]
+		& \delta(\Pi)\wedge\hspace{1mm}Time(cl^{To}) = 0\hspace{1mm}\wedge  \\
+		& \theta,e,\mathcal{S}\xrightarrow{rec(\kappa,\overline{cl},cl^{To})}\theta',e',\mathcal{S}'\hspace{1mm}\wedge \underset{p_i\in\Pi}{\cup }matchrec({\overline{cl_n}}^i\theta,v)=\varnothing 
 		\end{aligned}$
 		}
-\UnaryInfC{$\Gamma;\underset{i}{|}<p_i,h_i,\theta_i,e_i,\mathcal{S} _i>\hspace{1mm}\xrightarrow{\delta }\hspace{1mm}\Gamma;\underset{i}{|}<p_i,\delta(e_i):h_i,\theta_i,e'_i,\mathcal{S} _i>$}
+\UnaryInfC{$\Gamma;<p,\theta,e,\mathcal{S}>|\Pi\hspace{1mm}\hookrightarrow \hspace{1mm}\Gamma;<p,(\theta,e'\{\kappa\mapsto e^{To}\}),\mathcal{S}'>|\Pi$}
+\end{prooftree}
+
+\begin{prooftree}
+	\LeftLabel{(receive2)}
+	\AxiomC{
+		$\begin{aligned}
+		& \forall i\Bigg[\delta(<\theta,e,\mathcal{S}>)\wedge\hspace{1mm}Time(cl_i^{To}) > 0\hspace{1mm}\wedge  \\
+		& \theta_i,e_i,\mathcal{S}_i\xrightarrow{rec(\kappa,\overline{cl},cl^{To})}\theta'_i,e'_i,\mathcal{S}'_i\hspace{1mm}\wedge \underset{\{\_,p_i,v\}\in\Gamma}{\cup }matchrec({\overline{cl_n}}^i\theta,v)=\varnothing \Bigg]
+		\end{aligned}$
+		}
+\UnaryInfC{$\Gamma;\underset{i}{|}<p_i,\theta_i,e_i,\mathcal{S} _i>\hspace{1mm}\overset{\delta}{\rightharpoonup }\hspace{1mm}\Gamma;\underset{i}{|}<p_i,\theta_i,e'_i\{\kappa_i\mapsto receive\hspace{1mm}{\overline{cl}}^i\hspace{1mm}after\hspace{1mm}((cl^{To})^i-1)\},\mathcal{S} _i>$}
 \end{prooftree}
 \subsection{Backward reversible semantics}
-\hspace{10mm}$(\overline{\text{Sleep}})\hspace{1mm}\Gamma;\underset{i}{|}<p_i,\delta(e_i):h_i,\theta_i,e'_i,\mathcal{S} _i>\hspace{1mm}\xleftarrow{\delta }\hspace{1mm}\Gamma;\underset{i}{|}<p_i,h_i,\theta_i,e_i,\mathcal{S} _i>$
+\hspace{10mm}$(\overline{\text{receive2}})\hspace{1mm}\Gamma;\underset{i}{|}<p_i,\theta_i,e'_i\{\kappa_i\mapsto receive\hspace{1mm}{\overline{cl}}^i\hspace{1mm}after\hspace{1mm}((cl^{To})^i-1)\},\mathcal{S} _i>\overset{\delta}{\leftharpoondown }\hspace{1mm}\Gamma;\underset{i}{|}<p_i,\theta_i,e_i,\mathcal{S} _i>$
 
 \end{document}
